@@ -76,5 +76,8 @@ GROUP BY VillainId";
    FROM Towns as t
    JOIN Countries AS c ON c.Id = t.CountryCode
   WHERE c.Name = @countryName";
+
+        public const string GetAllMinions =
+            @"SELECT Name FROM Minions";
     }
 }

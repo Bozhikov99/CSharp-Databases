@@ -17,7 +17,7 @@ namespace AllVillainNames
 
             await using (connection)
             {
-                await DeleteVillain(connection);
+                await GetMinions(connection);
             }
         }
 
@@ -159,7 +159,7 @@ namespace AllVillainNames
             }
 
         }
-
+        //05. Remove villain
         private static async Task DeleteVillain(SqlConnection connection)
         {
             int villainId = int.Parse(Console.ReadLine());
@@ -189,6 +189,38 @@ namespace AllVillainNames
 
             Console.WriteLine($"{villainName} was deleted.");
             Console.WriteLine($"{minionCount} minions were released.");
+        }
+        //6. Print All Minion Names
+        private static async Task GetMinions(SqlConnection connection)
+        {
+            SqlCommand getMinions = new SqlCommand(Queries.GetAllMinions, connection);
+
+            SqlDataReader reader = await getMinions.ExecuteReaderAsync();
+            List<string> minionNames = new List<string>();
+
+            using (reader)
+            {
+                while (reader.Read())
+                {
+                    minionNames.Add((string)reader["Name"]);
+                }
+            }
+
+            int count = 0;
+
+            for (int i = 0; i < minionNames.Count; i++)
+            {
+                Console.WriteLine($"{minionNames[i]}");
+                count++;
+
+                if (count>=minionNames.Count)
+                {
+                    break;
+                }
+
+                Console.WriteLine($"{minionNames[minionNames.Count-i-1]}");
+                count++;
+            }
         }
     }
 }
