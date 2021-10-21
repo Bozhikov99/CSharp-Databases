@@ -1,6 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 
 namespace AllVillainNames
 {
@@ -13,7 +17,7 @@ namespace AllVillainNames
 
             await using (connection)
             {
-                await AddMinion(connection);
+                await DeleteVillain(connection);
             }
         }
 
@@ -61,7 +65,7 @@ namespace AllVillainNames
                 }
             }
         }
-
+        //03. Add Minion
         private static async Task AddMinion(SqlConnection connection)
         {
             //Minion: Bob 14 Berlin
@@ -120,6 +124,71 @@ namespace AllVillainNames
             mapMinion.Parameters.AddWithValue("@villainId", villain);
 
             Console.WriteLine($"Successfully added {minionName} to be minion of {villainName}.");
+        }
+
+        private static async Task ChangeTownsNameCasing(SqlConnection connection)
+        {
+            string country = Console.ReadLine();
+
+            SqlCommand changeTownsCasing = new SqlCommand(Queries.SetTownsToUpper, connection);
+            changeTownsCasing.Parameters.AddWithValue("@countryName", country);
+            int rowsAffected = await changeTownsCasing.ExecuteNonQueryAsync();
+
+            if (rowsAffected == 0)
+            {
+                Console.WriteLine("No town names were affected.");
+                return;
+            }
+
+            Console.WriteLine($"{rowsAffected} town names were affected.");
+
+            SqlCommand getTowns = new SqlCommand(Queries.GetAffectedTowns, connection);
+            getTowns.Parameters.AddWithValue("@countryName", country);
+            SqlDataReader reader = await getTowns.ExecuteReaderAsync();
+
+            await using (reader)
+            {
+                List<string> townNames = new List<string>();
+
+                while (reader.Read())
+                {
+                    townNames.Add((string)reader["Name"]);
+                }
+
+                Console.WriteLine($"[{string.Join(", ", townNames)}]");
+            }
+
+        }
+
+        private static async Task DeleteVillain(SqlConnection connection)
+        {
+            int villainId = int.Parse(Console.ReadLine());
+
+            SqlCommand getVillainNameFromId = new SqlCommand(Queries.GetVillainNameFromId, connection);
+            getVillainNameFromId.Parameters.AddWithValue("@villainId", villainId);
+
+            object villainName = await getVillainNameFromId.ExecuteScalarAsync();
+
+            if (villainName==null)
+            {
+                Console.WriteLine("No such villain was found.");
+                return;
+            }
+
+            SqlCommand getMinionCount = new SqlCommand(Queries.GetReleasedMinionsCount, connection);
+            getMinionCount.Parameters.AddWithValue("villainId", villainId);
+            object minionCount = await getMinionCount.ExecuteScalarAsync();
+
+            SqlCommand removeMapping = new SqlCommand(Queries.RemoveVillainMinionMapping, connection);
+            removeMapping.Parameters.AddWithValue("@villainId", villainId);
+            await removeMapping.ExecuteNonQueryAsync();
+
+            SqlCommand deleteVillain = new SqlCommand(Queries.DeleteVillainWithId, connection);
+            deleteVillain.Parameters.AddWithValue("villainId", villainId);
+            await deleteVillain.ExecuteNonQueryAsync();
+
+            Console.WriteLine($"{villainName} was deleted.");
+            Console.WriteLine($"{minionCount} minions were released.");
         }
     }
 }

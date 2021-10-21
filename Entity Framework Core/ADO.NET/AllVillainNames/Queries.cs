@@ -28,7 +28,26 @@ namespace AllVillainNames
 
         public const string GetVillianIdFromName =
             @"SELECT Id FROM Villains WHERE Name = @Name";
-        
+
+        public const string GetVillainNameFromId =
+            @"SELECT Name FROM Villains WHERE Id = @villainId";
+
+        public const string RemoveVillainMinionMapping =
+            @"DELETE 
+              FROM MinionsVillains
+             WHERE VillainId=@villainId";
+
+        public const string DeleteVillainWithId =
+            @"DELETE 
+              FROM Villains
+             WHERE Id=@villainId";
+
+        public const string GetReleasedMinionsCount =
+            @" SELECT COUNT(MinionId) AS MinionCount
+    FROM MinionsVillains
+   WHERE VillainId=@villainId
+GROUP BY VillainId";
+
         public const string GetMinionIdFromName =
             @"SELECT Id FROM Villains WHERE Name = @Name";
 
@@ -46,5 +65,16 @@ namespace AllVillainNames
 
         public const string CreateMinion =
             @"INSERT INTO Minions (Name, Age, TownId) VALUES (@nam, @age, @townId)";
+
+        public const string SetTownsToUpper =
+            @"UPDATE Towns
+   SET Name = UPPER(Name)
+ WHERE CountryCode = (SELECT c.Id FROM Countries AS c WHERE c.Name = @countryName)";
+
+        public const string GetAffectedTowns =
+            @" SELECT t.Name 
+   FROM Towns as t
+   JOIN Countries AS c ON c.Id = t.CountryCode
+  WHERE c.Name = @countryName";
     }
 }
