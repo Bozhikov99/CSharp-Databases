@@ -79,5 +79,13 @@ GROUP BY VillainId";
 
         public const string GetAllMinions =
             @"SELECT Name FROM Minions";
+
+        public const string IncreaseMinionAge =
+            @" UPDATE Minions
+                  SET Name = UPPER(LEFT(Name, 1)) + SUBSTRING(Name, 2, LEN(Name)), Age += 1
+                WHERE Id = @Id";
+
+        public const string GetMinionNameAge =
+            @"SELECT Name, Age FROM Minions";
     }
 }

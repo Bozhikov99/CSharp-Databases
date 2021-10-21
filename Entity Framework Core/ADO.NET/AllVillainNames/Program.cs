@@ -1,8 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 
@@ -17,7 +19,7 @@ namespace AllVillainNames
 
             await using (connection)
             {
-                await GetMinions(connection);
+                await IncreaseMinionAge(connection);
             }
         }
 
@@ -220,6 +222,32 @@ namespace AllVillainNames
 
                 Console.WriteLine($"{minionNames[minionNames.Count-i-1]}");
                 count++;
+            }
+        }
+
+        //7. Increase Minion Age
+        private static async Task IncreaseMinionAge(SqlConnection connection)
+        {
+            int[] ids = Console.ReadLine()
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(int.Parse)
+                .ToArray();
+
+            foreach (int i in ids)
+            {
+                SqlCommand increaseMinionAge = new SqlCommand(Queries.IncreaseMinionAge, connection);
+                increaseMinionAge.Parameters.AddWithValue("Id", i);
+                await increaseMinionAge.ExecuteNonQueryAsync();
+            }
+
+            SqlDataReader reader = await new SqlCommand(Queries.GetMinionNameAge, connection).ExecuteReaderAsync();
+
+            using (reader)
+            {
+                while (reader.Read())
+                {
+                    Console.WriteLine($"{reader["Name"]} {reader["Age"]}");
+                }
             }
         }
     }
