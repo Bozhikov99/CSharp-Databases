@@ -43,31 +43,6 @@ namespace SoftUni
                 sb.AppendLine(p);
             }
 
-            //StringBuilder sb = new StringBuilder();
-
-            // context
-            //    .Addresses
-            //    .GroupBy(a => new
-            //    {
-            //        a.AddressId,
-            //        a.AddressText,
-            //        a.Town.Name
-            //    },
-            //        (key, group) => new
-            //        {
-            //            key.AddressText,
-            //            Town = key.Name,
-            //            Count = group.Sum(a => a.Employees.Count)
-            //        })
-            //    .OrderByDescending(a => a.Count)
-            //    .ThenBy(a => a.Town)
-            //    .ThenBy(a => a.AddressText)
-            //    .Take(10)
-            //    .ToList()
-            //  .ForEach(a => sb.AppendLine($"{a.AddressText}, {a.Town} - {a.Count} employees"));
-
-
-
             return sb
                 .ToString()
                 .TrimEnd();
